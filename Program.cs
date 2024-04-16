@@ -42,17 +42,14 @@ app.MapGet("/Usuarios" ,async (AppDbContext context) =>
 
 app.MapGet("/Usuario/{id}", async (AppDbContext context, int id) =>
 {
-    
-    var usuarios = await context.Usuarios.FindAsync(id);
+    var usuario = await context.Usuarios.FindAsync(id);
 
-    if(usuarios == null)
+    if (usuario == null)
     {
-        return Results.NotFound("Usuário não encontrado");
+        return Results.BadRequest("Usuario não localizado");
     }
-
-    return Results.Ok(usuarios);
+    return Results.Ok(usuario);
 });
-
 app.MapPost("/Usuario", async (AppDbContext context, UsuarioModel usuario) =>
 {
     context.Usuarios.Add(usuario);
@@ -60,5 +57,22 @@ app.MapPost("/Usuario", async (AppDbContext context, UsuarioModel usuario) =>
 
     return await GetUsuarios(context);
 });
+
+app.MapPut("/Usuarios", async (AppDbContext context, UsuarioModel usuario) =>
+{
+    var usuarioDb = await context.Usuarios.AsNoTracking().FirstOrDefaultAsync(u => u.Id  == usuario.Id);
+
+     usuarioDb.Nome = usuario.Nome;
+     usuarioDb.UserName = usuario.UserName;
+     usuarioDb.Email = usuario.Email;
+
+    context.Update(usuario);
+    await context.SaveChangesAsync();
+
+    return  Results.Ok( await GetUsuarios(context));
+});
+
+
 app.Run();
+
 

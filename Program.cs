@@ -40,6 +40,13 @@ app.MapGet("/Usuarios" ,async (AppDbContext context) =>
     return await GetUsuarios(context);
     });
 
+app.MapGet("/Usuario/{id}", async (AppDbContext context, int id) =>
+{
+    var usuarios = await context.Usuarios.FindAsync(id);
+
+    return Results.Ok(usuarios);
+});
+
 app.MapPost("/Usuario", async (AppDbContext context, UsuarioModel usuario) =>
 {
     context.Usuarios.Add(usuario);

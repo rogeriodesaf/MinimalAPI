@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using MinimalApiProject.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,4 +30,22 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+async Task<List<UsuarioModel>> GetUsuarios(AppDbContext context)
+{
+    return await context.Usuarios.ToListAsync();
+}
+
+app.MapGet("/Usuarios" ,async (AppDbContext context) =>
+{
+    return await GetUsuarios(context);
+    });
+
+app.MapPost("/Usuario", async (AppDbContext context, UsuarioModel usuario) =>
+{
+    context.Usuarios.Add(usuario);
+    await context.SaveChangesAsync();
+
+    return await GetUsuarios(context);
+});
 app.Run();
+

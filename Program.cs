@@ -42,7 +42,13 @@ app.MapGet("/Usuarios" ,async (AppDbContext context) =>
 
 app.MapGet("/Usuario/{id}", async (AppDbContext context, int id) =>
 {
+    
     var usuarios = await context.Usuarios.FindAsync(id);
+
+    if(usuarios == null)
+    {
+        return Results.NotFound("Usuário não encontrado");
+    }
 
     return Results.Ok(usuarios);
 });

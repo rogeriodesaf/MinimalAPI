@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using MinimalApiProject.Models;
 
@@ -58,20 +59,34 @@ app.MapPost("/Usuario", async (AppDbContext context, UsuarioModel usuario) =>
     return await GetUsuarios(context);
 });
 
-app.MapPut("/Usuarios", async (AppDbContext context, UsuarioModel usuario) =>
+app.MapPut("/Usuarios", async(AppDbContext context, UsuarioModel usuario)=>
 {
-    var usuarioDb = await context.Usuarios.AsNoTracking().FirstOrDefaultAsync(u => u.Id  == usuario.Id);
+    var usuarioDb = await context.Usuarios.AsNoTracking().FirstOrDefaultAsync(u => u.Id == usuario.Id);
 
-     usuarioDb.Nome = usuario.Nome;
-     usuarioDb.UserName = usuario.UserName;
-     usuarioDb.Email = usuario.Email;
+
+    if (usuarioDb == null) return Results.BadRequest("Usuário Não Localizado");
+
+    usuarioDb.Nome = usuario.Nome;
+    usuarioDb.UserName = usuario.UserName;
+    usuarioDb.Email = usuario.Email;
 
     context.Update(usuario);
     await context.SaveChangesAsync();
 
-    return  Results.Ok( await GetUsuarios(context));
+    return Results.Ok(await GetUsuarios(context));
 });
 
+app.MapDelete("/Usuarios/{id}", async (AppDbContext context, int id) =>
+{
+    var usuarioDb = await context.Usuarios.FindAsync(id);
+
+    if (usuarioDb == null) return Results.NotFound("Usuário não localizado");
+
+    context.Usuarios.Remove(usuarioDb); 
+    await context.SaveChangesAsync();
+    return Results.Ok(await GetUsuarios(context));
+
+});
 
 app.Run();
 
